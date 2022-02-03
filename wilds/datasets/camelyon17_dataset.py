@@ -153,7 +153,7 @@ class Camelyon17Dataset(WILDSDataset):
                 slide_mask = (self._metadata_df['slide'] == slide)
                 self._metadata_df.loc[slide_mask, 'split'] = self.split_dict['test']    
         
-            remove_center_mask = (self._metadata_df['center'] == 3)
+            remove_center_mask = (self._metadata_df['center'] == 2)
             self._metadata_df.loc[remove_center_mask, 'split'] = self.split_dict['id_val']
 
         elif self._split_scheme == 'mixed-to-test':
