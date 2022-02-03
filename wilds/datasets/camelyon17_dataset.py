@@ -126,6 +126,34 @@ class Camelyon17Dataset(WILDSDataset):
             for slide in test_slides:
                 slide_mask = (self._metadata_df['slide'] == slide)
                 self._metadata_df.loc[slide_mask, 'split'] = self.split_dict['test']                 
+
+        elif self._split_scheme == 'vanilla_no3':
+            # train-val-test with equal representation of hospitals. 
+            # 
+            # constraints:
+            # - equal representation of hospitals. 
+            # - train/val and test set must be separated by slides
+            # - large and small slides are approximately equally distributed
+            # - stratified by tumour presence
+            # note: separating by patient is not necessary, as patient IDs were anyway assigned arbitrarily                    
+
+            rng = np.random.default_rng(12345)
+
+            train_mask = rng.random(len(self._metadata_df)) < 0.8
+            self._metadata_df.loc[train_mask, 'split'] = self.split_dict['train'] 
+
+            val_mask = train_mask == False
+            self._metadata_df.loc[val_mask, 'split'] = self.split_dict['val'] 
+
+            # these slides were selected to ensure equal label prevalence and approximately 20% of overall patches per hospital
+            test_slides = [4, 5, 7, 14, 16, 19, 22, 23, 25, 32, 33, 39, 47, 49]
+            for slide in test_slides:
+                slide_mask = (self._metadata_df['slide'] == slide)
+                self._metadata_df.loc[slide_mask, 'split'] = self.split_dict['test']    
+        
+            remove_center_mask = (self._metadata_df['center'] == 3)
+            self._metadata_df.loc[remove_center_mask, 'split'] = self.split_dict['id_val']
+
         elif self._split_scheme == 'mixed-to-test':
             # For the mixed-to-test setting,
             # we move slide 23 (corresponding to patient 042, node 3 in the original dataset)
